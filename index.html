@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta
             name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         />
         <title>Save That</title>
         <link rel="manifest" href="./manifest.json" />
@@ -36,6 +36,11 @@
                 --sh-md: 0 4px 14px rgba(0, 0, 0, 0.12);
                 --sh-lg: 0 8px 30px rgba(0, 0, 0, 0.18);
                 --t: 0.18s ease;
+                --glass: rgba(255, 255, 255, 0.62);
+                --glass-input: rgba(255, 255, 255, 0.48);
+                --glass-edge: rgba(255, 255, 255, 0.42);
+                --glass-border: rgba(200, 195, 230, 0.55);
+                --glass-shadow: 0 4px 24px rgba(108, 99, 255, 0.08);
             }
             [data-theme="dark"] {
                 --primary: #8b83ff;
@@ -50,6 +55,11 @@
                 --sh-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
                 --sh-md: 0 4px 14px rgba(0, 0, 0, 0.55);
                 --sh-lg: 0 8px 30px rgba(0, 0, 0, 0.65);
+                --glass: rgba(22, 22, 40, 0.7);
+                --glass-input: rgba(35, 35, 60, 0.58);
+                --glass-edge: rgba(255, 255, 255, 0.06);
+                --glass-border: rgba(255, 255, 255, 0.07);
+                --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
             }
 
             /* ── Reset & Base ───────────────────────────────────────── */
@@ -253,7 +263,8 @@
                 width: 90px;
                 height: 90px;
                 border-radius: 22px;
-                object-fit: cover;
+                object-fit: contain;
+                background: var(--surface2);
                 box-shadow: 0 8px 32px rgba(108, 99, 255, 0.22);
                 margin-bottom: 22px;
             }
@@ -1170,30 +1181,253 @@
                 transform: translateX(-50%) translateY(0);
             }
 
-            /* ── Mobile (≤768px) ────────────────────────────────────── */
+            /* ── Mobile – iOS 26 Liquid Glass ───────────────────────── */
             @media (max-width: 768px) {
+                /* ── Gradient canvas ── */
                 .app {
                     position: relative;
+                    background: var(--bg);
                 }
+
+                /* ── Sidebar glass ── */
                 #sidebar {
                     position: absolute;
                     inset: 0;
+                    /* respect top safe area (notch / dynamic island) */
+                    padding-top: env(safe-area-inset-top, 0px);
                     width: 100%;
                     min-width: 0;
                     z-index: 10;
+                    background: var(--glass);
+                    -webkit-backdrop-filter: blur(32px) saturate(200%);
+                    backdrop-filter: blur(32px) saturate(200%);
+                    border-right: none;
                 }
+
+                /* ── Editor glass ── */
                 #editor {
                     position: absolute;
                     inset: 0;
+                    /* respect top safe area */
+                    padding-top: env(safe-area-inset-top, 0px);
                     z-index: 20;
-                    transform: translateX(100%);
-                    transition: transform 0.26s ease;
+                    transform: translateX(102%);
+                    transition: transform 0.44s cubic-bezier(0.32, 0.72, 0, 1);
+                    background: var(--glass);
+                    -webkit-backdrop-filter: blur(32px) saturate(200%);
+                    backdrop-filter: blur(32px) saturate(200%);
                 }
                 #editor.open {
                     transform: translateX(0);
                 }
+
+                /* ── Back button ── */
                 #back-btn {
                     display: flex;
+                }
+
+                /* ── Search ── */
+                .search-area {
+                    padding: 14px 14px 10px;
+                    background: transparent;
+                }
+                #search-input {
+                    background: var(--glass-input);
+                    -webkit-backdrop-filter: blur(16px);
+                    backdrop-filter: blur(16px);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 14px;
+                    padding: 11px 12px 11px 36px;
+                    font-size: 15px;
+                    box-shadow:
+                        inset 0 1px 0 var(--glass-edge),
+                        0 2px 6px rgba(0, 0, 0, 0.06);
+                }
+                #search-input:focus {
+                    border-color: var(--primary);
+                    box-shadow:
+                        inset 0 1px 0 var(--glass-edge),
+                        0 0 0 3px rgba(108, 99, 255, 0.15);
+                }
+
+                /* ── Toolbar ── */
+                .toolbar {
+                    background: transparent;
+                    padding: 2px 12px 8px;
+                    gap: 2px;
+                }
+                .tb-btn {
+                    border-radius: 10px;
+                    font-size: 13px;
+                }
+
+                /* ── Folder scroll ── */
+                .folder-scroll-wrap {
+                    background: transparent;
+                    border-bottom: 1px solid var(--glass-border);
+                    padding: 8px 0;
+                }
+                .folder-chip {
+                    background: var(--glass-input);
+                    -webkit-backdrop-filter: blur(10px);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 20px;
+                    padding: 6px 16px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    color: var(--text2);
+                    box-shadow:
+                        inset 0 1px 0 var(--glass-edge),
+                        0 1px 3px rgba(0, 0, 0, 0.05);
+                }
+                .folder-chip.active {
+                    background: var(--primary);
+                    border-color: transparent;
+                    color: #fff;
+                    box-shadow: 0 3px 12px rgba(108, 99, 255, 0.45);
+                }
+                .folder-chip.smart {
+                    background: transparent;
+                    border: 1.5px dashed var(--glass-border);
+                    font-style: italic;
+                }
+                .folder-chip.smart.active {
+                    background: var(--primary);
+                    border: 1.5px solid transparent;
+                    font-style: normal;
+                }
+
+                /* ── Note list – card layout (ID selector!) ── */
+                #note-list {
+                    padding: 8px 10px;
+                    /* bottom: FAB height + home indicator */
+                    padding-bottom: calc(
+                        88px + env(safe-area-inset-bottom, 0px)
+                    );
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    overflow-y: auto;
+                }
+                .note-item {
+                    border-radius: 18px;
+                    /* override base transparent border */
+                    border: 1px solid var(--glass-border);
+                    margin-bottom: 0;
+                    padding: 14px 16px;
+                    background: var(--glass-input);
+                    -webkit-backdrop-filter: blur(14px);
+                    backdrop-filter: blur(14px);
+                    box-shadow:
+                        inset 0 1px 0 var(--glass-edge),
+                        var(--glass-shadow);
+                    transition:
+                        transform 0.14s ease,
+                        box-shadow 0.14s ease;
+                }
+                .note-item:hover {
+                    background: var(--glass-input);
+                }
+                .note-item:active {
+                    transform: scale(0.975);
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+                }
+                .note-item.active {
+                    border-color: var(--primary);
+                    box-shadow:
+                        inset 0 1px 0 var(--glass-edge),
+                        0 3px 14px rgba(108, 99, 255, 0.22);
+                }
+
+                /* ── FAB – above home indicator ── */
+                #fab {
+                    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+                    right: 18px;
+                    width: 58px;
+                    height: 58px;
+                    border-radius: 29px;
+                    box-shadow:
+                        0 4px 22px rgba(108, 99, 255, 0.5),
+                        0 2px 6px rgba(0, 0, 0, 0.14),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+                }
+
+                /* ── Editor header / meta / body ── */
+                .ed-header {
+                    background: transparent;
+                    padding: 12px 16px 10px;
+                    border-bottom: 1px solid var(--glass-border);
+                }
+                .ed-meta {
+                    background: transparent;
+                    border-bottom: 1px solid var(--glass-border);
+                }
+                .meta-field {
+                    background: transparent;
+                }
+                #note-body {
+                    background: transparent;
+                    font-size: 16px;
+                    padding: 18px;
+                    -webkit-text-size-adjust: 100%;
+                }
+                #md-preview {
+                    background: transparent;
+                    padding: 18px;
+                }
+
+                /* ── Format footer – above home indicator ── */
+                .ed-footer {
+                    background: var(--glass-input);
+                    -webkit-backdrop-filter: blur(16px);
+                    backdrop-filter: blur(16px);
+                    border-top: 1px solid var(--glass-border);
+                    box-shadow: inset 0 1px 0 var(--glass-edge);
+                    padding-bottom: env(safe-area-inset-bottom, 0px);
+                }
+
+                /* ── Focus bar ── */
+                .focus-bar {
+                    background: transparent;
+                    border-bottom: 1px solid var(--glass-border);
+                }
+                #focus-exit {
+                    color: var(--text2);
+                }
+
+                /* ── Context menus ── */
+                .ctx-menu {
+                    border-radius: 16px;
+                    padding: 6px;
+                    background: var(--glass);
+                    -webkit-backdrop-filter: blur(28px) saturate(200%);
+                    backdrop-filter: blur(28px) saturate(200%);
+                    border: 1px solid var(--glass-border);
+                }
+                .ctx-item {
+                    padding: 12px 14px;
+                    font-size: 15px;
+                    border-radius: 10px;
+                }
+
+                /* ── Toast – above home indicator ── */
+                #toast {
+                    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+                    border-radius: 14px;
+                    background: var(--glass);
+                    -webkit-backdrop-filter: blur(24px) saturate(180%);
+                    backdrop-filter: blur(24px) saturate(180%);
+                    border: 1px solid var(--glass-border);
+                    color: var(--text);
+                    box-shadow: var(--glass-shadow);
+                    font-size: 14px;
+                    padding: 11px 22px;
+                }
+
+                /* ── Loading screen ── */
+                #loading-screen {
+                    background: var(--bg);
                 }
             }
         </style>
