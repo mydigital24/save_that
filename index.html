@@ -1,0 +1,3223 @@
+<!doctype html>
+<html data-theme="light" lang="de">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Save That</title>
+        <link rel="manifest" href="./manifest.json" />
+        <meta name="theme-color" content="#6c63ff" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Save That" />
+        <link rel="apple-touch-icon" href="./icon.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            /* ── CSS Variables ──────────────────────────────────────── */
+            :root {
+                --primary: #6c63ff;
+                --primary-light: #ede9ff;
+                --bg: #f4f3f8;
+                --surface: #ffffff;
+                --surface2: #f0eff6;
+                --text: #1a1a2e;
+                --text2: #6b6b80;
+                --danger: #e53935;
+                --border: #e3e1ef;
+                --radius: 10px;
+                --sh-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+                --sh-md: 0 4px 14px rgba(0, 0, 0, 0.12);
+                --sh-lg: 0 8px 30px rgba(0, 0, 0, 0.18);
+                --t: 0.18s ease;
+            }
+            [data-theme="dark"] {
+                --primary: #8b83ff;
+                --primary-light: #25224e;
+                --bg: #10101a;
+                --surface: #1b1b2a;
+                --surface2: #232336;
+                --text: #e6e6f0;
+                --text2: #8888a8;
+                --danger: #ff5252;
+                --border: #2c2c44;
+                --sh-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+                --sh-md: 0 4px 14px rgba(0, 0, 0, 0.55);
+                --sh-lg: 0 8px 30px rgba(0, 0, 0, 0.65);
+            }
+
+            /* ── Reset & Base ───────────────────────────────────────── */
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+            }
+            body {
+                font-family:
+                    "Inter",
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                font-size: 14px;
+                line-height: 1.5;
+                background: var(--bg);
+                color: var(--text);
+                transition:
+                    background var(--t),
+                    color var(--t);
+            }
+            button {
+                font-family: inherit;
+                cursor: pointer;
+            }
+            input,
+            textarea {
+                font-family: inherit;
+            }
+            * {
+                scrollbar-width: thin;
+                scrollbar-color: var(--border) transparent;
+            }
+            *::-webkit-scrollbar {
+                width: 4px;
+                height: 4px;
+            }
+            *::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            *::-webkit-scrollbar-thumb {
+                background: var(--border);
+                border-radius: 2px;
+            }
+
+            /* ── App Layout ─────────────────────────────────────────── */
+            .app {
+                display: flex;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            /* ── Sidebar ────────────────────────────────────────────── */
+            #sidebar {
+                width: 300px;
+                min-width: 300px;
+                display: flex;
+                flex-direction: column;
+                background: var(--surface);
+                border-right: 1px solid var(--border);
+                position: relative;
+                z-index: 10;
+                transition:
+                    background var(--t),
+                    border-color var(--t);
+            }
+
+            /* Search */
+            .search-area {
+                padding: 14px 14px 8px;
+            }
+            .search-wrap {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+            .search-wrap .s-icon {
+                position: absolute;
+                left: 10px;
+                color: var(--text2);
+                pointer-events: none;
+                display: flex;
+                align-items: center;
+            }
+            #search-input {
+                width: 100%;
+                padding: 8px 10px 8px 34px;
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                background: var(--surface2);
+                color: var(--text);
+                font-size: 13px;
+                outline: none;
+                transition:
+                    border-color var(--t),
+                    background var(--t);
+            }
+            #search-input:focus {
+                border-color: var(--primary);
+                background: var(--surface);
+            }
+            #search-input::placeholder {
+                color: var(--text2);
+            }
+            #search-input.has-value {
+                padding-right: 32px;
+            }
+
+            /* Search clear button */
+            .search-clear {
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 20px;
+                height: 20px;
+                border: none;
+                background: var(--border);
+                color: var(--text2);
+                cursor: pointer;
+                border-radius: 50%;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                flex-shrink: 0;
+                transition:
+                    background var(--t),
+                    color var(--t);
+            }
+            .search-clear.show {
+                display: flex;
+            }
+            .search-clear:hover {
+                background: var(--text2);
+                color: var(--surface);
+            }
+
+            /* Search result meta */
+            .search-meta {
+                font-size: 11px;
+                color: var(--text2);
+                padding: 5px 2px 0;
+                min-height: 17px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                transition: color var(--t);
+            }
+            .search-meta-count {
+                font-weight: 600;
+                color: var(--primary);
+            }
+            .search-meta-filter {
+                opacity: 0.7;
+            }
+
+            /* Match highlights in note list */
+            mark {
+                background: rgba(108, 99, 255, 0.14);
+                color: inherit;
+                border-radius: 2px;
+                padding: 0 1px;
+                font-style: inherit;
+                font-weight: inherit;
+            }
+            [data-theme="dark"] mark {
+                background: rgba(108, 99, 255, 0.32);
+            }
+
+            /* ── Loading screen ──────────────────────────────────── */
+            #loading-screen {
+                position: fixed;
+                inset: 0;
+                z-index: 99999;
+                background: var(--surface);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0;
+                transition:
+                    opacity 0.55s ease,
+                    visibility 0.55s ease;
+                user-select: none;
+            }
+            #loading-screen.fade-out {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+            }
+            .ld-logo {
+                width: 90px;
+                height: 90px;
+                border-radius: 22px;
+                object-fit: cover;
+                box-shadow: 0 8px 32px rgba(108, 99, 255, 0.22);
+                margin-bottom: 22px;
+            }
+            .ld-title {
+                font-size: 23px;
+                font-weight: 700;
+                color: var(--text);
+                letter-spacing: -0.4px;
+                margin-bottom: 5px;
+            }
+            .ld-smiley {
+                font-size: 17px;
+                color: var(--primary);
+                font-family: "Courier New", "Courier", monospace;
+                font-weight: 700;
+                letter-spacing: 4px;
+                margin-bottom: 30px;
+                opacity: 0.85;
+            }
+            .ld-dots {
+                display: flex;
+                gap: 7px;
+            }
+            .ld-dot {
+                width: 7px;
+                height: 7px;
+                background: var(--primary);
+                border-radius: 50%;
+                opacity: 0.35;
+                animation: ldBounce 1.1s ease-in-out infinite;
+            }
+            .ld-dot:nth-child(2) {
+                animation-delay: 0.18s;
+            }
+            .ld-dot:nth-child(3) {
+                animation-delay: 0.36s;
+            }
+            @keyframes ldBounce {
+                0%,
+                100% {
+                    transform: translateY(0);
+                    opacity: 0.35;
+                }
+                50% {
+                    transform: translateY(-7px);
+                    opacity: 1;
+                }
+            }
+
+            /* Toolbar */
+            .toolbar {
+                display: flex;
+                align-items: center;
+                gap: 1px;
+                padding: 2px 10px 8px;
+            }
+            .tb-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 5px 7px;
+                border: none;
+                background: none;
+                color: var(--text2);
+                font-size: 12px;
+                font-weight: 500;
+                border-radius: 7px;
+                white-space: nowrap;
+                transition:
+                    background var(--t),
+                    color var(--t);
+            }
+            .tb-btn:hover {
+                background: var(--surface2);
+                color: var(--text);
+            }
+            .tb-btn.danger:hover {
+                background: rgba(229, 57, 53, 0.1);
+                color: var(--danger);
+            }
+            .tb-spacer {
+                flex: 1;
+            }
+
+            /* Folder scroll */
+            .folder-scroll-wrap {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                padding: 0 8px 10px;
+            }
+            .fs-arrow {
+                flex-shrink: 0;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background: none;
+                color: var(--text2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                pointer-events: none;
+                transition:
+                    opacity var(--t),
+                    background var(--t);
+            }
+            .fs-arrow.visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            .fs-arrow:hover {
+                background: var(--surface2);
+            }
+
+            #folder-bar {
+                flex: 1;
+                display: flex;
+                gap: 6px;
+                overflow-x: auto;
+                scroll-behavior: smooth;
+                scrollbar-width: none;
+                padding: 2px 2px;
+                cursor: grab;
+                user-select: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+            #folder-bar::-webkit-scrollbar {
+                display: none;
+            }
+            #folder-bar.is-dragging {
+                cursor: grabbing;
+                scroll-behavior: auto;
+            }
+
+            .folder-chip {
+                flex-shrink: 0;
+                padding: 5px 13px;
+                border-radius: 20px;
+                border: 1px solid var(--border);
+                background: var(--surface2);
+                color: var(--text2);
+                font-size: 12px;
+                font-weight: 500;
+                cursor: pointer;
+                white-space: nowrap;
+                transition:
+                    border-color var(--t),
+                    background var(--t),
+                    color var(--t);
+                -webkit-tap-highlight-color: transparent;
+            }
+            .folder-chip:hover {
+                border-color: var(--primary);
+                color: var(--primary);
+            }
+            .folder-chip.active {
+                background: var(--primary);
+                border-color: var(--primary);
+                color: #fff;
+            }
+
+            /* Note list */
+            #note-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 0 8px 84px;
+            }
+            .note-item {
+                padding: 11px 12px;
+                border-radius: var(--radius);
+                margin-bottom: 3px;
+                cursor: pointer;
+                border: 1px solid transparent;
+                transition:
+                    background var(--t),
+                    border-color var(--t);
+                -webkit-tap-highlight-color: transparent;
+            }
+            .note-item:hover {
+                background: var(--surface2);
+            }
+            .note-item.active {
+                background: var(--primary-light);
+                border-color: var(--primary);
+            }
+            .ni-title {
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--text);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-bottom: 3px;
+            }
+            .ni-preview {
+                font-size: 12px;
+                color: var(--text2);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-bottom: 4px;
+            }
+            .ni-meta {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .ni-date {
+                font-size: 11px;
+                color: var(--text2);
+            }
+            .ni-folder {
+                font-size: 11px;
+                color: var(--text2);
+                background: var(--surface2);
+                border: 1px solid var(--border);
+                padding: 1px 7px;
+                border-radius: 10px;
+                max-width: 110px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .note-item.active .ni-folder {
+                background: var(--primary-light);
+                border-color: var(--primary);
+            }
+
+            .notes-empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                padding: 48px 20px;
+                color: var(--text2);
+                font-size: 13px;
+                text-align: center;
+            }
+            .notes-empty svg {
+                opacity: 0.3;
+            }
+
+            /* FAB */
+            #fab {
+                position: absolute;
+                bottom: 18px;
+                right: 14px;
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: var(--primary);
+                color: #fff;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: var(--sh-md);
+                z-index: 20;
+                transition:
+                    transform var(--t),
+                    box-shadow var(--t),
+                    background var(--t);
+            }
+            #fab:hover {
+                transform: scale(1.07);
+                box-shadow: var(--sh-lg);
+            }
+            #fab:active {
+                transform: scale(0.93);
+            }
+
+            /* ── Editor ─────────────────────────────────────────────── */
+            #editor {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                background: var(--bg);
+                min-width: 0;
+                transition: background var(--t);
+            }
+
+            /* Placeholder */
+            .ed-placeholder {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                color: var(--text2);
+                font-size: 13px;
+                text-align: center;
+                padding: 40px;
+            }
+            .ed-placeholder svg {
+                opacity: 0.2;
+            }
+
+            /* Editor header */
+            .ed-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 16px;
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
+                transition:
+                    background var(--t),
+                    border-color var(--t);
+            }
+            #back-btn {
+                display: none;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                border: none;
+                background: none;
+                color: var(--text2);
+                border-radius: 7px;
+                transition:
+                    background var(--t),
+                    color var(--t);
+            }
+            #back-btn:hover {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            #note-title {
+                flex: 1;
+                border: none;
+                background: none;
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--text);
+                outline: none;
+                min-width: 0;
+                transition: color var(--t);
+            }
+            #note-title::placeholder {
+                color: var(--text2);
+                font-weight: 400;
+            }
+
+            .ed-icon-btn {
+                width: 32px;
+                height: 32px;
+                border: none;
+                background: none;
+                color: var(--text2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 7px;
+                transition:
+                    background var(--t),
+                    color var(--t);
+            }
+            .ed-icon-btn:hover {
+                background: var(--surface2);
+                color: var(--text);
+            }
+            .ed-icon-btn.on {
+                color: var(--primary);
+                background: var(--primary-light);
+            }
+            .ed-icon-btn.danger:hover {
+                background: rgba(229, 57, 53, 0.1);
+                color: var(--danger);
+            }
+
+            /* Editor meta */
+            .ed-meta {
+                display: flex;
+                align-items: center;
+                padding: 0 16px;
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
+                transition:
+                    background var(--t),
+                    border-color var(--t);
+            }
+            .meta-field {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                flex: 1;
+                padding: 7px 0;
+            }
+            .meta-field svg {
+                color: var(--text2);
+                flex-shrink: 0;
+            }
+            .meta-field input {
+                flex: 1;
+                border: none;
+                background: none;
+                font-size: 12px;
+                color: var(--text2);
+                outline: none;
+                min-width: 0;
+                transition: color var(--t);
+            }
+            .meta-field input:focus {
+                color: var(--text);
+            }
+            .meta-field input::placeholder {
+                color: var(--border);
+            }
+            .meta-sep {
+                width: 1px;
+                height: 18px;
+                background: var(--border);
+                flex-shrink: 0;
+                margin: 0 8px;
+            }
+
+            /* Textarea */
+            #note-body {
+                flex: 1;
+                padding: 20px;
+                border: none;
+                background: none;
+                font-size: 14px;
+                color: var(--text);
+                resize: none;
+                outline: none;
+                line-height: 1.75;
+                transition: color var(--t);
+            }
+            #note-body::placeholder {
+                color: var(--text2);
+            }
+
+            /* Markdown preview */
+            #md-preview {
+                flex: 1;
+                padding: 20px;
+                overflow-y: auto;
+                line-height: 1.75;
+                color: var(--text);
+                display: none;
+            }
+            #md-preview h1 {
+                font-size: 1.55em;
+                font-weight: 700;
+                margin: 0 0 14px;
+                color: var(--text);
+            }
+            #md-preview h2 {
+                font-size: 1.25em;
+                font-weight: 600;
+                margin: 18px 0 10px;
+                color: var(--text);
+            }
+            #md-preview h3 {
+                font-size: 1.05em;
+                font-weight: 600;
+                margin: 14px 0 8px;
+                color: var(--text);
+            }
+            #md-preview p {
+                margin-bottom: 8px;
+            }
+            #md-preview strong {
+                font-weight: 600;
+            }
+            #md-preview em {
+                font-style: italic;
+            }
+            #md-preview code {
+                background: var(--surface2);
+                border: 1px solid var(--border);
+                padding: 1px 5px;
+                border-radius: 4px;
+                font-family:
+                    "Cascadia Code", "Fira Code", "Courier New", monospace;
+                font-size: 0.86em;
+            }
+            #md-preview hr {
+                border: none;
+                border-top: 1px solid var(--border);
+                margin: 16px 0;
+            }
+            #md-preview ul {
+                list-style: none;
+                padding: 0;
+                margin-bottom: 8px;
+            }
+            #md-preview ul li {
+                padding: 2px 0;
+            }
+
+            .md-check {
+                display: flex;
+                align-items: flex-start;
+                gap: 8px;
+                padding: 3px 0;
+            }
+            .md-box {
+                width: 15px;
+                height: 15px;
+                border: 1.5px solid var(--border);
+                border-radius: 3px;
+                flex-shrink: 0;
+                margin-top: 3px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all var(--t);
+            }
+            .md-box.checked {
+                background: var(--primary);
+                border-color: var(--primary);
+            }
+            .md-box.checked::after {
+                content: "";
+                display: block;
+                width: 8px;
+                height: 5px;
+                border-left: 1.5px solid #fff;
+                border-bottom: 1.5px solid #fff;
+                transform: rotate(-45deg) translateY(-1px);
+            }
+            .md-lbl.done {
+                text-decoration: line-through;
+                color: var(--text2);
+            }
+
+            /* Editor footer */
+            .ed-footer {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                padding: 0 10px 0 4px;
+                min-height: 34px;
+                background: var(--surface);
+                border-top: 1px solid var(--border);
+                transition:
+                    background var(--t),
+                    border-color var(--t);
+                overflow: hidden;
+            }
+            .fmt-bar {
+                display: flex;
+                align-items: center;
+                gap: 1px;
+                flex: 1;
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+            .fmt-bar::-webkit-scrollbar {
+                display: none;
+            }
+            .fmt-btn {
+                flex-shrink: 0;
+                width: 28px;
+                height: 28px;
+                border: none;
+                background: transparent;
+                color: var(--text2);
+                cursor: pointer;
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-family: inherit;
+                line-height: 1;
+                padding: 0;
+                transition:
+                    background var(--t),
+                    color var(--t);
+            }
+            .fmt-btn:hover {
+                background: var(--surface2);
+                color: var(--text);
+            }
+            .fmt-btn:active {
+                background: var(--border);
+            }
+            .fmt-btn.fmt-bold {
+                font-weight: 700;
+            }
+            .fmt-btn.fmt-italic {
+                font-style: italic;
+                font-size: 13px;
+            }
+            .fmt-btn.fmt-strike {
+                text-decoration: line-through;
+            }
+            .fmt-sep-v {
+                width: 1px;
+                height: 16px;
+                background: var(--border);
+                flex-shrink: 0;
+                margin: 0 3px;
+            }
+            #fs-val {
+                flex-shrink: 0;
+                font-size: 11px;
+                color: var(--text2);
+                min-width: 22px;
+                text-align: center;
+                pointer-events: none;
+                transition: color var(--t);
+            }
+            .wc-right {
+                flex-shrink: 0;
+                font-size: 11px;
+                color: var(--text2);
+                white-space: nowrap;
+                padding-left: 8px;
+                border-left: 1px solid var(--border);
+                transition:
+                    color var(--t),
+                    border-color var(--t);
+            }
+
+            /* ── Link Picker (// command) ───────────────────────────── */
+            #link-picker {
+                position: fixed;
+                z-index: 2500;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--sh-lg);
+                width: 260px;
+                max-height: 260px;
+                overflow-y: auto;
+                display: none;
+                transition:
+                    background var(--t),
+                    border-color var(--t);
+            }
+            #link-picker.open {
+                display: block;
+            }
+            .pk-section {
+                padding: 6px 12px 3px;
+                font-size: 10px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                color: var(--text2);
+            }
+            .pk-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 12px;
+                font-size: 13px;
+                color: var(--text);
+                cursor: pointer;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                transition: background var(--t);
+            }
+            .pk-item:hover,
+            .pk-item.pk-on {
+                background: var(--surface2);
+            }
+            .pk-item svg {
+                flex-shrink: 0;
+                color: var(--text2);
+            }
+            .pk-sep {
+                height: 1px;
+                background: var(--border);
+                margin: 3px 0;
+            }
+            .pk-empty {
+                padding: 12px 14px;
+                font-size: 13px;
+                color: var(--text2);
+            }
+
+            /* ── Markdown inline link chips ─────────────────────────── */
+            .md-note-link {
+                color: var(--primary);
+                background: rgba(37, 99, 235, 0.09);
+                border-radius: 4px;
+                padding: 1px 5px;
+                cursor: pointer;
+                font-size: 0.92em;
+                white-space: nowrap;
+                transition: opacity 0.15s;
+            }
+            [data-theme="dark"] .md-note-link {
+                background: rgba(59, 130, 246, 0.15);
+            }
+            .md-note-link:hover {
+                opacity: 0.72;
+            }
+            .md-note-link.md-unresolved {
+                color: var(--text2);
+                background: var(--surface2);
+                border: 1px dashed var(--border);
+                cursor: default;
+            }
+            .md-folder-link {
+                color: var(--text2);
+                background: var(--surface2);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 1px 6px;
+                cursor: pointer;
+                font-size: 0.92em;
+                white-space: nowrap;
+                transition: background 0.15s;
+            }
+            .md-folder-link:hover {
+                background: var(--border);
+            }
+            #md-preview del {
+                text-decoration: line-through;
+                color: var(--text2);
+            }
+            #md-preview a {
+                color: var(--primary);
+                text-underline-offset: 2px;
+            }
+
+            /* ── Smart folder chips ─────────────────────────────────── */
+            .folder-chip.smart {
+                background: transparent;
+                border: 1.5px solid var(--border);
+                color: var(--text2);
+                font-style: italic;
+            }
+            .folder-chip.smart.active {
+                background: var(--primary);
+                color: #fff;
+                border-color: var(--primary);
+                font-style: normal;
+            }
+
+            /* ── Fokus-Modus ─────────────────────────────────────────── */
+
+            /* Thin top bar visible only in focus mode */
+            .focus-bar {
+                display: none;
+                align-items: center;
+                justify-content: flex-end;
+                padding: 6px 10px;
+                gap: 6px;
+                flex-shrink: 0;
+                border-bottom: 1px solid transparent;
+                transition:
+                    border-color var(--t),
+                    background var(--t);
+            }
+            body.focus-mode .focus-bar {
+                display: flex;
+            }
+
+            #focus-exit {
+                width: 30px;
+                height: 30px;
+                border: none;
+                border-radius: 7px;
+                background: transparent;
+                color: var(--text2);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                opacity: 0.55;
+                transition:
+                    opacity 0.2s,
+                    background 0.2s;
+            }
+            #focus-exit:hover {
+                opacity: 1;
+                background: var(--surface2);
+            }
+
+            body.focus-mode #sidebar {
+                display: none !important;
+            }
+            body.focus-mode .ed-header {
+                display: none !important;
+            }
+            body.focus-mode .ed-meta {
+                display: none !important;
+            }
+            body.focus-mode .ed-footer {
+                display: none !important;
+            }
+            body.focus-mode #editor {
+                background: var(--surface);
+                overflow-y: auto;
+            }
+            body.focus-mode #note-body {
+                flex: none;
+                width: 100%;
+                max-width: 700px;
+                min-height: calc(100vh - 44px);
+                height: auto;
+                margin: 0 auto;
+                padding: 44px 28px 80px;
+                font-size: 17px;
+                line-height: 1.85;
+                letter-spacing: 0.01em;
+                overflow: hidden;
+                resize: none;
+                display: block;
+            }
+            body.focus-mode #md-preview {
+                flex: none;
+                max-width: 700px;
+                margin: 0 auto;
+                padding: 44px 28px 80px;
+                font-size: 17px;
+                line-height: 1.85;
+                overflow: visible;
+            }
+
+            /* ── PWA offline banner ──────────────────────────────────── */
+            #offline-bar {
+                display: none;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 5000;
+                background: #374151;
+                color: #f9fafb;
+                font-size: 12px;
+                font-weight: 500;
+                text-align: center;
+                padding: 6px 12px;
+                letter-spacing: 0.02em;
+            }
+            #offline-bar.show {
+                display: block;
+            }
+
+            /* ── Context Menus ──────────────────────────────────────── */
+            .ctx-menu {
+                position: fixed;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--sh-lg);
+                min-width: 168px;
+                padding: 4px;
+                z-index: 2000;
+                display: none;
+                transition:
+                    background var(--t),
+                    border-color var(--t);
+            }
+            .ctx-menu.visible {
+                display: block;
+            }
+            .ctx-item {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+                padding: 8px 10px;
+                border-radius: 7px;
+                font-size: 13px;
+                color: var(--text);
+                cursor: pointer;
+                white-space: nowrap;
+                transition:
+                    background var(--t),
+                    color var(--t);
+            }
+            .ctx-item:hover {
+                background: var(--surface2);
+            }
+            .ctx-item.danger {
+                color: var(--danger);
+            }
+            .ctx-item.danger:hover {
+                background: rgba(229, 57, 53, 0.1);
+            }
+            .ctx-sep {
+                height: 1px;
+                background: var(--border);
+                margin: 4px 2px;
+            }
+
+            /* ── Toast ──────────────────────────────────────────────── */
+            #toast {
+                position: fixed;
+                bottom: 22px;
+                left: 50%;
+                transform: translateX(-50%) translateY(16px);
+                background: var(--text);
+                color: var(--surface);
+                padding: 9px 20px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 500;
+                opacity: 0;
+                pointer-events: none;
+                z-index: 3000;
+                white-space: nowrap;
+                box-shadow: var(--sh-md);
+                transition:
+                    opacity 0.25s ease,
+                    transform 0.25s ease;
+            }
+            #toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            /* ── Mobile (≤768px) ────────────────────────────────────── */
+            @media (max-width: 768px) {
+                .app {
+                    position: relative;
+                }
+                #sidebar {
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    min-width: 0;
+                    z-index: 10;
+                }
+                #editor {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 20;
+                    transform: translateX(100%);
+                    transition: transform 0.26s ease;
+                }
+                #editor.open {
+                    transform: translateX(0);
+                }
+                #back-btn {
+                    display: flex;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- ── Loading Screen ────────────────────────────────────── -->
+        <div id="loading-screen">
+            <img src="./logo.jpg" alt="save_that" class="ld-logo" />
+            <div class="ld-title">save_that</div>
+            <div class="ld-smiley">:-)</div>
+            <div class="ld-dots">
+                <div class="ld-dot"></div>
+                <div class="ld-dot"></div>
+                <div class="ld-dot"></div>
+            </div>
+        </div>
+
+        <!-- ── Note Context Menu ──────────────────────────────────── -->
+        <div id="ctx-note" class="ctx-menu" role="menu">
+            <div class="ctx-item" id="ctx-note-open">
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                Öffnen
+            </div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item danger" id="ctx-note-delete">
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14H6L5 6" />
+                    <path d="M10 11v6" />
+                    <path d="M14 11v6" />
+                    <path d="M9 6V4h6v2" />
+                </svg>
+                Notiz löschen
+            </div>
+        </div>
+
+        <!-- ── Folder Context Menu ───────────────────────────────── -->
+        <div id="ctx-folder" class="ctx-menu" role="menu">
+            <div class="ctx-item" id="ctx-folder-select">
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path
+                        d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                    />
+                </svg>
+                Auswählen
+            </div>
+            <div class="ctx-sep" id="ctx-folder-sep"></div>
+            <div class="ctx-item danger" id="ctx-folder-delete">
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14H6L5 6" />
+                    <path d="M10 11v6" />
+                    <path d="M14 11v6" />
+                    <path d="M9 6V4h6v2" />
+                </svg>
+                Ordner löschen
+            </div>
+        </div>
+
+        <!-- ── Toast ─────────────────────────────────────────────── -->
+        <div id="toast"></div>
+
+        <!-- ── Hidden file import input ──────────────────────────── -->
+        <input
+            type="file"
+            id="import-input"
+            accept=".json"
+            style="display: none"
+        />
+
+        <!-- ── Offline indicator ─────────────────────────────────── -->
+        <div id="offline-bar">
+            Offline – Änderungen werden synchronisiert sobald du wieder online
+            bist
+        </div>
+
+        <!-- ── Link Picker (// command) ─────────────────────────── -->
+        <div id="link-picker" role="listbox" aria-label="Verknüpfung einfügen">
+            <div id="pk-body"></div>
+        </div>
+
+        <!-- ── App ───────────────────────────────────────────────── -->
+        <div class="app">
+            <!-- SIDEBAR ─────────────────────────────────────────── -->
+            <div id="sidebar">
+                <!-- Search -->
+                <div class="search-area">
+                    <div class="search-wrap">
+                        <span class="s-icon">
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                        </span>
+                        <input
+                            type="text"
+                            id="search-input"
+                            placeholder="Titel, Inhalt, Tags, Datum…"
+                            autocomplete="off"
+                            spellcheck="false"
+                        />
+                        <button
+                            id="search-clear"
+                            class="search-clear"
+                            title="Suche löschen"
+                            tabindex="-1"
+                        >
+                            <svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="3"
+                                stroke-linecap="round"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="search-meta" class="search-meta"></div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <button
+                        class="tb-btn"
+                        id="theme-btn"
+                        title="Erscheinungsbild umschalten"
+                    >
+                        <svg
+                            id="theme-icon"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                        <span id="theme-label">Hell</span>
+                    </button>
+                    <div class="tb-spacer"></div>
+                    <button
+                        class="tb-btn"
+                        id="export-btn"
+                        title="Als JSON exportieren"
+                    >
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path
+                                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                            />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Export
+                    </button>
+                    <button
+                        class="tb-btn"
+                        id="import-btn"
+                        title="Aus JSON importieren"
+                    >
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path
+                                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                            />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        Import
+                    </button>
+                    <button
+                        class="tb-btn danger"
+                        id="reset-btn"
+                        title="Alle Daten löschen"
+                    >
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path
+                                d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                            />
+                            <path d="M3 3v5h5" />
+                        </svg>
+                        Reset
+                    </button>
+                </div>
+
+                <!-- Folder Scroll -->
+                <div class="folder-scroll-wrap">
+                    <button
+                        class="fs-arrow"
+                        id="fs-left"
+                        aria-label="Links scrollen"
+                    >
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                    </button>
+                    <div
+                        id="folder-bar"
+                        tabindex="0"
+                        role="tablist"
+                        aria-label="Ordner auswählen"
+                    ></div>
+                    <button
+                        class="fs-arrow"
+                        id="fs-right"
+                        aria-label="Rechts scrollen"
+                    >
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Note List -->
+                <div id="note-list"></div>
+
+                <!-- FAB -->
+                <button id="fab" aria-label="Neue Notiz erstellen">
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                    >
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                </button>
+            </div>
+            <!-- /sidebar -->
+
+            <!-- EDITOR ──────────────────────────────────────────── -->
+            <div id="editor">
+                <!-- Placeholder (no note selected) -->
+                <div class="ed-placeholder" id="ed-placeholder">
+                    <svg
+                        width="52"
+                        height="52"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path
+                            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                        />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                    <p>Wähle eine Notiz aus<br />oder erstelle eine neue.</p>
+                </div>
+
+                <!-- Editor Header -->
+                <div class="ed-header" id="ed-header" style="display: none">
+                    <button id="back-btn" aria-label="Zurück">
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                    </button>
+                    <input
+                        type="text"
+                        id="note-title"
+                        placeholder="Titel…"
+                        autocomplete="off"
+                        spellcheck="false"
+                    />
+                    <button
+                        class="ed-icon-btn"
+                        id="focus-btn"
+                        title="Fokus-Modus (ablenkungsfrei)"
+                        aria-label="Fokus-Modus"
+                    >
+                        <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M3 8V5a2 2 0 0 1 2-2h3" />
+                            <path d="M16 3h3a2 2 0 0 1 2 2v3" />
+                            <path d="M21 16v3a2 2 0 0 1-2 2h-3" />
+                            <path d="M8 21H5a2 2 0 0 1-2-2v-3" />
+                        </svg>
+                    </button>
+                    <button
+                        class="ed-icon-btn"
+                        id="preview-btn"
+                        title="Markdown-Vorschau umschalten"
+                    >
+                        <svg
+                            id="preview-icon"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path
+                                d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"
+                            />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                    </button>
+                    <button
+                        class="ed-icon-btn danger"
+                        id="delete-btn"
+                        title="Notiz löschen"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14H6L5 6" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                            <path d="M9 6V4h6v2" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Editor Meta -->
+                <div class="ed-meta" id="ed-meta" style="display: none">
+                    <div class="meta-field">
+                        <svg
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path
+                                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                            />
+                        </svg>
+                        <input
+                            type="text"
+                            id="note-folder"
+                            placeholder="Ordner…"
+                            autocomplete="off"
+                            spellcheck="false"
+                        />
+                    </div>
+                    <div class="meta-sep"></div>
+                    <div class="meta-field">
+                        <svg
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path
+                                d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+                            />
+                            <line x1="7" y1="7" x2="7.01" y2="7" />
+                        </svg>
+                        <input
+                            type="text"
+                            id="note-tags"
+                            placeholder="Tags, kommagetrennt…"
+                            autocomplete="off"
+                            spellcheck="false"
+                        />
+                    </div>
+                </div>
+
+                <!-- Focus mode top bar (only visible in focus-mode) -->
+                <div class="focus-bar">
+                    <button
+                        id="focus-exit"
+                        title="Fokus-Modus beenden (Esc)"
+                        aria-label="Fokus-Modus beenden"
+                    >
+                        <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+                            <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+                            <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+                            <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Textarea -->
+                <textarea
+                    id="note-body"
+                    placeholder="Schreibe etwas…"
+                    spellcheck="true"
+                    style="display: none"
+                ></textarea>
+
+                <!-- Markdown Preview -->
+                <div id="md-preview" aria-live="polite"></div>
+
+                <!-- Editor Footer -->
+                <div class="ed-footer" id="ed-footer" style="display: none">
+                    <div class="fmt-bar">
+                        <button
+                            class="fmt-btn fmt-bold"
+                            data-fmt="bold"
+                            title="Fett (Strg+B)"
+                        >
+                            B
+                        </button>
+                        <button
+                            class="fmt-btn fmt-italic"
+                            data-fmt="italic"
+                            title="Kursiv (Strg+I)"
+                        >
+                            I
+                        </button>
+                        <button
+                            class="fmt-btn fmt-strike"
+                            data-fmt="strike"
+                            title="Durchgestrichen"
+                        >
+                            S
+                        </button>
+                        <div class="fmt-sep-v"></div>
+                        <button
+                            class="fmt-btn"
+                            data-fmt="h1"
+                            title="Überschrift 1"
+                            style="font-size: 11px; font-weight: 700"
+                        >
+                            H1
+                        </button>
+                        <button
+                            class="fmt-btn"
+                            data-fmt="h2"
+                            title="Überschrift 2"
+                            style="font-size: 11px; font-weight: 700"
+                        >
+                            H2
+                        </button>
+                        <button
+                            class="fmt-btn"
+                            data-fmt="h3"
+                            title="Überschrift 3"
+                            style="font-size: 11px; font-weight: 700"
+                        >
+                            H3
+                        </button>
+                        <div class="fmt-sep-v"></div>
+                        <button class="fmt-btn" data-fmt="ul" title="Liste">
+                            <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                            >
+                                <line x1="9" y1="6" x2="20" y2="6" />
+                                <line x1="9" y1="12" x2="20" y2="12" />
+                                <line x1="9" y1="18" x2="20" y2="18" />
+                                <circle
+                                    cx="4"
+                                    cy="6"
+                                    r="1.5"
+                                    fill="currentColor"
+                                    stroke="none"
+                                />
+                                <circle
+                                    cx="4"
+                                    cy="12"
+                                    r="1.5"
+                                    fill="currentColor"
+                                    stroke="none"
+                                />
+                                <circle
+                                    cx="4"
+                                    cy="18"
+                                    r="1.5"
+                                    fill="currentColor"
+                                    stroke="none"
+                                />
+                            </svg>
+                        </button>
+                        <button
+                            class="fmt-btn"
+                            data-fmt="check"
+                            title="Checkliste"
+                        >
+                            <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                            >
+                                <rect
+                                    x="3"
+                                    y="3"
+                                    width="18"
+                                    height="18"
+                                    rx="3"
+                                />
+                                <polyline points="7 12 11 16 17 8" />
+                            </svg>
+                        </button>
+                        <button class="fmt-btn" data-fmt="code" title="Code">
+                            <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                            >
+                                <polyline points="16 18 22 12 16 6" />
+                                <polyline points="8 6 2 12 8 18" />
+                            </svg>
+                        </button>
+                        <div class="fmt-sep-v"></div>
+                        <button
+                            class="fmt-btn"
+                            data-fmt="link"
+                            title="Verknüpfung einfügen (//)"
+                        >
+                            <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                            >
+                                <path
+                                    d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                                />
+                                <path
+                                    d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                                />
+                            </svg>
+                        </button>
+                        <div class="fmt-sep-v"></div>
+                        <button
+                            class="fmt-btn"
+                            data-fmt="smaller"
+                            title="Schrift kleiner"
+                            style="font-size: 11px"
+                        >
+                            A−
+                        </button>
+                        <span id="fs-val">14</span>
+                        <button
+                            class="fmt-btn"
+                            data-fmt="larger"
+                            title="Schrift größer"
+                            style="font-size: 13px; font-weight: 600"
+                        >
+                            A+
+                        </button>
+                    </div>
+                    <div class="wc-right">
+                        <span id="wc-display">0 Wörter · 0 Zeichen</span>
+                    </div>
+                </div>
+            </div>
+            <!-- /editor -->
+        </div>
+        <!-- /app -->
+
+        <script type="module">
+            /* ── Firebase ─────────────────────────────────────────────────── */
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+            import {
+                getFirestore,
+                collection,
+                doc,
+                onSnapshot,
+                setDoc,
+                deleteDoc,
+                getDocs,
+            } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+            const app = initializeApp({
+                apiKey: "AIzaSyAySiMGc3vbfkPwlTuLFnMRdZsBSLvZ1p8",
+                authDomain: "cooking-plan-12404.firebaseapp.com",
+                projectId: "cooking-plan-12404",
+                storageBucket: "cooking-plan-12404.firebasestorage.app",
+                messagingSenderId: "646774578838",
+                appId: "1:646774578838:web:26de1f261ba1c6c602acb7",
+            });
+            const db = getFirestore(app);
+            const notesCol = collection(db, "notes");
+
+            /* ── State ────────────────────────────────────────────────────── */
+            let notes = {}; // id → note object
+            let activeId = null;
+            let activeFolder = "Alle";
+            let searchQuery = "";
+            let previewMode = false;
+            let saveTimer = null;
+            let ctxNoteId = null;
+            let ctxFolderName = null;
+            let resetClicks = 0;
+            let resetTimer = null;
+            // Tracks whether the last touch event was a long-press (to suppress click)
+            let suppressClick = false;
+
+            /* ── DOM helpers ──────────────────────────────────────────────── */
+            const $ = (id) => document.getElementById(id);
+
+            const sidebar = $("sidebar");
+            const editorEl = $("editor");
+            const edPlaceholder = $("ed-placeholder");
+            const edHeader = $("ed-header");
+            const edMeta = $("ed-meta");
+            const edFooter = $("ed-footer");
+            const noteTitle = $("note-title");
+            const noteFolder = $("note-folder");
+            const noteTags = $("note-tags");
+            const noteBody = $("note-body");
+            const mdPreview = $("md-preview");
+            const noteList = $("note-list");
+            const folderBar = $("folder-bar");
+            const searchInput = $("search-input");
+            const wcDisplay = $("wc-display");
+            const toastEl = $("toast");
+            const searchClearBtn = $("search-clear");
+            const searchMeta = $("search-meta");
+            const loadingScreen = $("loading-screen");
+            const importInput = $("import-input");
+            const ctxNoteEl = $("ctx-note");
+            const ctxFolderEl = $("ctx-folder");
+            const previewBtn = $("preview-btn");
+            const previewIcon = $("preview-icon");
+            const backBtn = $("back-btn");
+            const themeIcon = $("theme-icon");
+            const themeLabel = $("theme-label");
+            const fsLeft = $("fs-left");
+            const fsRight = $("fs-right");
+
+            /* ── Theme ────────────────────────────────────────────────────── */
+            const SUN_PATH = `
+  <circle cx="12" cy="12" r="5"/>
+  <line x1="12" y1="1"  x2="12" y2="3"/>
+  <line x1="12" y1="21" x2="12" y2="23"/>
+  <line x1="4.22"  y1="4.22"  x2="5.64"  y2="5.64"/>
+  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+  <line x1="1"  y1="12" x2="3"  y2="12"/>
+  <line x1="21" y1="12" x2="23" y2="12"/>
+  <line x1="4.22"  y1="19.78" x2="5.64"  y2="18.36"/>
+  <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>`;
+            const MOON_PATH = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+
+            function setTheme(t) {
+                document.documentElement.setAttribute("data-theme", t);
+                localStorage.setItem("nexus-theme", t);
+                if (t === "dark") {
+                    themeIcon.innerHTML = MOON_PATH;
+                    themeLabel.textContent = "Dunkel";
+                } else {
+                    themeIcon.innerHTML = SUN_PATH;
+                    themeLabel.textContent = "Hell";
+                }
+            }
+            // Apply saved or default theme immediately
+            setTheme(localStorage.getItem("nexus-theme") || "light");
+
+            $("theme-btn").addEventListener("click", () => {
+                const current =
+                    document.documentElement.getAttribute("data-theme");
+                setTheme(current === "dark" ? "light" : "dark");
+            });
+
+            /* ── Toast ────────────────────────────────────────────────────── */
+            let toastTimer = null;
+            function showToast(msg) {
+                clearTimeout(toastTimer);
+                toastEl.textContent = msg;
+                toastEl.classList.add("show");
+                toastTimer = setTimeout(
+                    () => toastEl.classList.remove("show"),
+                    2800,
+                );
+            }
+
+            /* ── Utilities ────────────────────────────────────────────────── */
+            function uid() {
+                return (
+                    Date.now().toString(36) +
+                    Math.random().toString(36).slice(2, 8)
+                );
+            }
+
+            function escHtml(s) {
+                return String(s ?? "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;");
+            }
+
+            function fmtDate(ts) {
+                if (!ts) return "";
+                return new Date(ts).toLocaleDateString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                });
+            }
+
+            /* ── Firestore real-time listener ─────────────────────────────── */
+            /* ── Loading screen dismiss ───────────────────────────────────── */
+            const ldStart = Date.now();
+            const MIN_LD_MS = 1600;
+            let ldDone = false;
+
+            function dismissLoader() {
+                if (ldDone || !loadingScreen) return;
+                ldDone = true;
+                const wait = Math.max(0, MIN_LD_MS - (Date.now() - ldStart));
+                setTimeout(() => {
+                    loadingScreen.classList.add("fade-out");
+                    setTimeout(() => loadingScreen.remove(), 620);
+                }, wait);
+            }
+
+            onSnapshot(notesCol, (snap) => {
+                notes = {};
+                snap.forEach((d) => {
+                    notes[d.id] = { id: d.id, ...d.data() };
+                });
+                renderFolders();
+                renderNotes();
+                dismissLoader();
+            });
+
+            // Safety fallback – hide loader after 6 s even if Firebase is slow
+            setTimeout(dismissLoader, 6000);
+
+            /* ── Folders ──────────────────────────────────────────────────── */
+            /* Smart folder IDs – never stored in Firebase */
+            const SMART = { HEUTE: "::heute", ZULETZT: "::zuletzt" };
+
+            function isToday(ts) {
+                if (!ts) return false;
+                const d = new Date(ts),
+                    n = new Date();
+                return (
+                    d.getFullYear() === n.getFullYear() &&
+                    d.getMonth() === n.getMonth() &&
+                    d.getDate() === n.getDate()
+                );
+            }
+
+            function getFolderList() {
+                const set = new Set();
+                Object.values(notes).forEach((n) => {
+                    const f = (n.folder || "").trim();
+                    if (f) set.add(f);
+                });
+                return [
+                    "Alle",
+                    SMART.HEUTE,
+                    SMART.ZULETZT,
+                    ...[...set].sort((a, b) => a.localeCompare(b)),
+                ];
+            }
+
+            function renderFolders() {
+                const folders = getFolderList();
+                folderBar.innerHTML = "";
+
+                const LABELS = {
+                    [SMART.HEUTE]: "Heute",
+                    [SMART.ZULETZT]: "Zuletzt",
+                };
+
+                folders.forEach((f) => {
+                    const isSmart = f === SMART.HEUTE || f === SMART.ZULETZT;
+                    const chip = document.createElement("div");
+                    chip.className =
+                        "folder-chip" +
+                        (isSmart ? " smart" : "") +
+                        (f === activeFolder ? " active" : "");
+                    chip.textContent = LABELS[f] ?? f;
+                    chip.dataset.folder = f;
+                    chip.setAttribute("role", "tab");
+                    chip.setAttribute(
+                        "aria-selected",
+                        String(f === activeFolder),
+                    );
+
+                    chip.addEventListener("click", () => {
+                        if (suppressClick || dragState.didDrag) return;
+                        activeFolder = f;
+                        renderFolders();
+                        renderNotes();
+                    });
+
+                    if (!isSmart) {
+                        chip.addEventListener("contextmenu", (e) => {
+                            e.preventDefault();
+                            showFolderMenu(e, f);
+                        });
+                        let lpTimer = null;
+                        chip.addEventListener(
+                            "touchstart",
+                            (e) => {
+                                suppressClick = false;
+                                lpTimer = setTimeout(() => {
+                                    suppressClick = true;
+                                    showFolderMenu(e.touches[0], f);
+                                }, 500);
+                            },
+                            { passive: true },
+                        );
+                        chip.addEventListener("touchend", () =>
+                            clearTimeout(lpTimer),
+                        );
+                        chip.addEventListener("touchmove", () =>
+                            clearTimeout(lpTimer),
+                        );
+                    }
+
+                    folderBar.appendChild(chip);
+                });
+
+                updateFolderArrows();
+            }
+
+            /* ── Notes ────────────────────────────────────────────────────── */
+            function getFilteredNotes() {
+                let list = Object.values(notes);
+
+                if (activeFolder === SMART.HEUTE) {
+                    list = list.filter((n) =>
+                        isToday(n.createdAt || n.updatedAt),
+                    );
+                } else if (activeFolder === SMART.ZULETZT) {
+                    list = list
+                        .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+                        .slice(0, 12);
+                } else if (activeFolder !== "Alle") {
+                    list = list.filter(
+                        (n) => (n.folder || "").trim() === activeFolder,
+                    );
+                }
+                if (searchQuery) {
+                    const q = searchQuery.toLowerCase();
+                    list = list.filter((n) => {
+                        try {
+                            if ((n.title || "").toLowerCase().includes(q))
+                                return true;
+                            if (
+                                (n.body || n.content || "")
+                                    .toLowerCase()
+                                    .includes(q)
+                            )
+                                return true;
+                            if ((n.tags || "").toLowerCase().includes(q))
+                                return true;
+                            if ((n.folder || "").toLowerCase().includes(q))
+                                return true;
+                            const ts = n.updatedAt || n.createdAt;
+                            if (ts) {
+                                const d = new Date(ts);
+                                const ds =
+                                    String(d.getDate()).padStart(2, "0") +
+                                    "." +
+                                    String(d.getMonth() + 1).padStart(2, "0") +
+                                    "." +
+                                    d.getFullYear() +
+                                    " " +
+                                    d.getFullYear();
+                                if (ds.includes(q)) return true;
+                            }
+                        } catch (_) {
+                            /* never block a note due to a formatting error */
+                        }
+                        return false;
+                    });
+                }
+
+                return list.sort(
+                    (a, b) => (b.updatedAt || 0) - (a.updatedAt || 0),
+                );
+            }
+
+            /* ── Search highlight helper ──────────────────────────────────── */
+            function highlight(text, term) {
+                if (!term || !text) return escHtml(text || "");
+                const safe = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+                return escHtml(text).replace(
+                    new RegExp(`(${safe})`, "gi"),
+                    "<mark>$1</mark>",
+                );
+            }
+
+            function renderNotes() {
+                const list = getFilteredNotes();
+                noteList.innerHTML = "";
+
+                if (!list.length) {
+                    noteList.innerHTML = `
+      <div class="notes-empty">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <p>Keine Notizen gefunden.</p>
+      </div>`;
+                    return;
+                }
+
+                list.forEach((n) => {
+                    const el = document.createElement("div");
+                    el.className =
+                        "note-item" + (n.id === activeId ? " active" : "");
+                    el.dataset.id = n.id;
+
+                    const preview = (n.body || "")
+                        .replace(/\s+/g, " ")
+                        .trim()
+                        .slice(0, 68);
+                    const folder = (n.folder || "").trim();
+
+                    el.innerHTML = `
+      <div class="ni-title">${highlight(n.title || "Ohne Titel", searchQuery)}</div>
+      <div class="ni-preview">${
+          preview
+              ? highlight(preview, searchQuery)
+              : '<span style="opacity:.4">Kein Inhalt</span>'
+      }</div>
+      <div class="ni-meta">
+        <span class="ni-date">${fmtDate(n.updatedAt)}</span>
+        ${folder ? `<span class="ni-folder">${highlight(folder, searchQuery)}</span>` : ""}
+      </div>`;
+
+                    // Open on click
+                    el.addEventListener("click", () => {
+                        if (suppressClick) return;
+                        openNote(n.id);
+                    });
+
+                    // Right-click context menu
+                    el.addEventListener("contextmenu", (e) => {
+                        e.preventDefault();
+                        showNoteMenu(e, n.id);
+                    });
+
+                    // 500 ms long-press (touch)
+                    let lpTimer = null;
+                    el.addEventListener(
+                        "touchstart",
+                        (e) => {
+                            suppressClick = false;
+                            lpTimer = setTimeout(() => {
+                                suppressClick = true;
+                                showNoteMenu(e.touches[0], n.id);
+                            }, 500);
+                        },
+                        { passive: true },
+                    );
+                    el.addEventListener("touchend", () =>
+                        clearTimeout(lpTimer),
+                    );
+                    el.addEventListener("touchmove", () =>
+                        clearTimeout(lpTimer),
+                    );
+
+                    noteList.appendChild(el);
+                });
+            }
+
+            /* ── Open / close note ────────────────────────────────────────── */
+            function openNote(id) {
+                activeId = id;
+                const n = notes[id];
+                if (!n) return;
+
+                // Populate fields
+                noteTitle.value = n.title || "";
+                noteFolder.value = n.folder || "";
+                noteTags.value = n.tags || "";
+                noteBody.value = n.body || "";
+
+                // Reset to edit mode
+                previewMode = false;
+                noteBody.style.display = "block";
+                mdPreview.style.display = "none";
+                previewBtn.classList.remove("on");
+                setPreviewIcon(false);
+
+                // Show all editor panels
+                edPlaceholder.style.display = "none";
+                edHeader.style.display = "flex";
+                edMeta.style.display = "flex";
+                edFooter.style.display = "block";
+
+                updateCounter();
+                renderNotes();
+
+                // Mobile: slide editor in
+                editorEl.classList.add("open");
+
+                // Focus title when brand-new
+                if (!noteTitle.value) noteTitle.focus();
+            }
+
+            function closeEditor() {
+                activeId = null;
+                editorEl.classList.remove("open");
+                edPlaceholder.style.display = "flex";
+                edHeader.style.display = "none";
+                edMeta.style.display = "none";
+                noteBody.style.display = "none";
+                edFooter.style.display = "none";
+                mdPreview.style.display = "none";
+                renderNotes();
+            }
+
+            backBtn.addEventListener("click", () => {
+                editorEl.classList.remove("open");
+                activeId = null;
+                renderNotes();
+            });
+
+            /* ── New note (FAB) ───────────────────────────────────────────── */
+            $("fab").addEventListener("click", async () => {
+                const id = uid();
+                const now = Date.now();
+                await setDoc(doc(db, "notes", id), {
+                    title: "",
+                    body: "",
+                    folder: activeFolder !== "Alle" ? activeFolder : "",
+                    tags: "",
+                    createdAt: now,
+                    updatedAt: now,
+                });
+                openNote(id);
+            });
+
+            /* ── Debounced save ───────────────────────────────────────────── */
+            function scheduleSave() {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(saveNote, 400);
+            }
+
+            async function saveNote() {
+                if (!activeId) return;
+                await setDoc(
+                    doc(db, "notes", activeId),
+                    {
+                        title: noteTitle.value,
+                        body: noteBody.value,
+                        folder: noteFolder.value.trim(),
+                        tags: noteTags.value.trim(),
+                        updatedAt: Date.now(),
+                    },
+                    { merge: true },
+                );
+            }
+
+            noteTitle.addEventListener("input", scheduleSave);
+            noteFolder.addEventListener("input", scheduleSave);
+            noteTags.addEventListener("input", scheduleSave);
+            noteBody.addEventListener("input", () => {
+                scheduleSave();
+                updateCounter();
+                detectSlash();
+            });
+
+            /* ── Delete note ──────────────────────────────────────────────── */
+            $("delete-btn").addEventListener("click", () =>
+                deleteNote(activeId),
+            );
+
+            async function deleteNote(id) {
+                if (!id || !notes[id]) return;
+                await deleteDoc(doc(db, "notes", id));
+                if (id === activeId) closeEditor();
+                showToast("Notiz gelöscht");
+            }
+
+            /* ── Word / character counter ─────────────────────────────────── */
+            function updateCounter() {
+                const raw = noteBody.value;
+                const chars = raw.length;
+                const words = raw.trim() ? raw.trim().split(/\s+/).length : 0;
+                wcDisplay.textContent = `${words} ${words === 1 ? "Wort" : "Wörter"} · ${chars} Zeichen`;
+            }
+
+            /* ── Formatting toolbar ───────────────────────────────────────── */
+            let editorFontSize = 14;
+
+            function wrapSel(before, after) {
+                const ta = noteBody;
+                const s = ta.selectionStart;
+                const e = ta.selectionEnd;
+                const v = ta.value;
+                const sel = v.slice(s, e) || "Text";
+                ta.value = v.slice(0, s) + before + sel + after + v.slice(e);
+                ta.selectionStart = s + before.length;
+                ta.selectionEnd = s + before.length + sel.length;
+                ta.focus();
+                scheduleSave();
+                updateCounter();
+                if (previewMode) mdPreview.innerHTML = parseMarkdown(ta.value);
+            }
+
+            function prependLine(prefix) {
+                const ta = noteBody;
+                const cur = ta.selectionStart;
+                const v = ta.value;
+                const ls = v.lastIndexOf("\n", cur - 1) + 1;
+                const le = v.indexOf("\n", cur);
+                const line = v.slice(ls, le === -1 ? undefined : le);
+                const rest = le === -1 ? "" : v.slice(le);
+                if (line.startsWith(prefix)) {
+                    ta.value =
+                        v.slice(0, ls) + line.slice(prefix.length) + rest;
+                    ta.selectionStart = ta.selectionEnd = Math.max(
+                        ls,
+                        cur - prefix.length,
+                    );
+                } else {
+                    ta.value = v.slice(0, ls) + prefix + line + rest;
+                    ta.selectionStart = ta.selectionEnd = cur + prefix.length;
+                }
+                ta.focus();
+                scheduleSave();
+                updateCounter();
+                if (previewMode) mdPreview.innerHTML = parseMarkdown(ta.value);
+            }
+
+            function applyFmt(type) {
+                switch (type) {
+                    case "bold":
+                        wrapSel("**", "**");
+                        break;
+                    case "italic":
+                        wrapSel("*", "*");
+                        break;
+                    case "strike":
+                        wrapSel("~~", "~~");
+                        break;
+                    case "code": {
+                        const sel = noteBody.value.slice(
+                            noteBody.selectionStart,
+                            noteBody.selectionEnd,
+                        );
+                        sel.includes("\n")
+                            ? wrapSel("```\n", "\n```")
+                            : wrapSel("`", "`");
+                        break;
+                    }
+                    case "h1":
+                        prependLine("# ");
+                        break;
+                    case "h2":
+                        prependLine("## ");
+                        break;
+                    case "h3":
+                        prependLine("### ");
+                        break;
+                    case "ul":
+                        prependLine("- ");
+                        break;
+                    case "check":
+                        prependLine("- [ ] ");
+                        break;
+                    case "smaller":
+                        editorFontSize = Math.max(10, editorFontSize - 1);
+                        noteBody.style.fontSize = editorFontSize + "px";
+                        mdPreview.style.fontSize = editorFontSize + "px";
+                        document.getElementById("fs-val").textContent =
+                            editorFontSize;
+                        break;
+                    case "larger":
+                        editorFontSize = Math.min(24, editorFontSize + 1);
+                        noteBody.style.fontSize = editorFontSize + "px";
+                        mdPreview.style.fontSize = editorFontSize + "px";
+                        document.getElementById("fs-val").textContent =
+                            editorFontSize;
+                        break;
+                    case "link": {
+                        const pos = noteBody.selectionStart;
+                        const v = noteBody.value;
+                        noteBody.value = v.slice(0, pos) + "//" + v.slice(pos);
+                        noteBody.selectionStart = noteBody.selectionEnd =
+                            pos + 2;
+                        noteBody.focus();
+                        noteBody.dispatchEvent(new Event("input"));
+                        break;
+                    }
+                }
+            }
+
+            document.querySelectorAll(".fmt-btn[data-fmt]").forEach((btn) => {
+                btn.addEventListener("click", () => applyFmt(btn.dataset.fmt));
+            });
+
+            /* ── // Link Picker ───────────────────────────────────────────── */
+            let pkSlashStart = -1;
+            let pkActiveIdx = -1;
+            let pkItems = [];
+            const linkPicker = $("link-picker");
+            const pkBody = $("pk-body");
+
+            function detectSlash() {
+                const val = noteBody.value;
+                const cur = noteBody.selectionStart;
+                const before = val.slice(0, cur);
+                const lastSl = before.lastIndexOf("//");
+                if (lastSl === -1) {
+                    hidePicker();
+                    return;
+                }
+                const afterSl = before.slice(lastSl + 2);
+                if (afterSl.includes("\n")) {
+                    hidePicker();
+                    return;
+                }
+                const prev = lastSl > 0 ? before[lastSl - 1] : "\n";
+                if (prev !== "\n" && prev !== " " && prev !== "\t") {
+                    hidePicker();
+                    return;
+                }
+                pkSlashStart = lastSl;
+                renderPicker(afterSl.toLowerCase());
+            }
+
+            function renderPicker(term) {
+                const matchNotes = Object.values(notes)
+                    .filter(
+                        (n) =>
+                            !term ||
+                            (n.title || "").toLowerCase().includes(term),
+                    )
+                    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+                    .slice(0, 6);
+
+                const allFolders = [
+                    ...new Set(
+                        Object.values(notes).map(
+                            (n) => n.folder || "Allgemein",
+                        ),
+                    ),
+                ].sort();
+                const matchFolders = allFolders
+                    .filter((f) => !term || f.toLowerCase().includes(term))
+                    .slice(0, 4);
+
+                const isUrl = /^https?:\/\/|^www\./i.test(term);
+
+                pkItems = [];
+                let html = "";
+
+                if (matchNotes.length) {
+                    html += '<div class="pk-section">Notizen</div>';
+                    matchNotes.forEach((n) => {
+                        const idx = pkItems.length;
+                        pkItems.push({
+                            type: "note",
+                            id: n.id,
+                            label: n.title || "Unbenannt",
+                        });
+                        html += `<div class="pk-item" data-pk="${idx}">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            ${escHtml(n.title || "Unbenannt")}
+                        </div>`;
+                    });
+                }
+
+                if (matchFolders.length) {
+                    if (html) html += '<div class="pk-sep"></div>';
+                    html += '<div class="pk-section">Ordner</div>';
+                    matchFolders.forEach((f) => {
+                        const idx = pkItems.length;
+                        pkItems.push({ type: "folder", label: f });
+                        html += `<div class="pk-item" data-pk="${idx}">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            ${escHtml(f)}
+                        </div>`;
+                    });
+                }
+
+                if (isUrl) {
+                    if (html) html += '<div class="pk-sep"></div>';
+                    const idx = pkItems.length;
+                    pkItems.push({ type: "url", label: term, url: term });
+                    html += `<div class="pk-item" data-pk="${idx}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                        </svg>
+                        ${escHtml(term)}
+                    </div>`;
+                }
+
+                if (!pkItems.length) {
+                    html =
+                        '<div class="pk-empty">Kein Ergebnis — gib einen Titel ein</div>';
+                }
+
+                pkBody.innerHTML = html;
+                pkActiveIdx = pkItems.length > 0 ? 0 : -1;
+                if (pkActiveIdx >= 0) setPkActive(0);
+
+                pkBody.querySelectorAll(".pk-item").forEach((el) => {
+                    el.addEventListener("click", () =>
+                        selectPickerItem(parseInt(el.dataset.pk)),
+                    );
+                });
+
+                // Position just above the footer
+                const rect = edFooter.getBoundingClientRect();
+                linkPicker.style.left = Math.max(8, rect.left + 12) + "px";
+                linkPicker.style.bottom =
+                    window.innerHeight - rect.top + 4 + "px";
+                linkPicker.style.top = "auto";
+                linkPicker.classList.add("open");
+            }
+
+            function setPkActive(idx) {
+                pkBody
+                    .querySelectorAll(".pk-item")
+                    .forEach((el, i) =>
+                        el.classList.toggle("pk-on", i === idx),
+                    );
+                pkActiveIdx = idx;
+            }
+
+            function selectPickerItem(idx) {
+                const item = pkItems[idx];
+                if (!item) return hidePicker();
+                const val = noteBody.value;
+                const cur = noteBody.selectionStart;
+                let insert = "";
+                if (item.type === "note") insert = `[[${item.label}]]`;
+                if (item.type === "folder") insert = `[[>>${item.label}]]`;
+                if (item.type === "url") insert = `[${item.url}](${item.url})`;
+                noteBody.value =
+                    val.slice(0, pkSlashStart) + insert + val.slice(cur);
+                noteBody.selectionStart = noteBody.selectionEnd =
+                    pkSlashStart + insert.length;
+                noteBody.focus();
+                hidePicker();
+                scheduleSave();
+                updateCounter();
+                if (previewMode)
+                    mdPreview.innerHTML = parseMarkdown(noteBody.value);
+            }
+
+            function hidePicker() {
+                linkPicker.classList.remove("open");
+                pkSlashStart = -1;
+                pkItems = [];
+                pkActiveIdx = -1;
+            }
+
+            noteBody.addEventListener("keydown", (e) => {
+                // Formatting shortcuts
+                if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+                    e.preventDefault();
+                    applyFmt("bold");
+                    return;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === "i") {
+                    e.preventDefault();
+                    applyFmt("italic");
+                    return;
+                }
+                // Picker navigation
+                if (!linkPicker.classList.contains("open")) return;
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setPkActive(Math.min(pkActiveIdx + 1, pkItems.length - 1));
+                } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setPkActive(Math.max(pkActiveIdx - 1, 0));
+                } else if (e.key === "Enter" && pkActiveIdx >= 0) {
+                    e.preventDefault();
+                    selectPickerItem(pkActiveIdx);
+                } else if (e.key === "Escape") {
+                    hidePicker();
+                }
+            });
+
+            document.addEventListener("click", (e) => {
+                if (!linkPicker.contains(e.target) && e.target !== noteBody)
+                    hidePicker();
+            });
+
+            /* ── Markdown preview ─────────────────────────────────────────── */
+            function setPreviewIcon(on) {
+                previewIcon.innerHTML = on
+                    ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8
+         a18.45 18.45 0 0 1 5.06-5.94"/>
+       <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8
+         a18.5 18.5 0 0 1-2.16 3.19"/>
+       <line x1="1" y1="1" x2="23" y2="23"/>`
+                    : `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+       <circle cx="12" cy="12" r="3"/>`;
+            }
+
+            previewBtn.addEventListener("click", () => {
+                previewMode = !previewMode;
+                if (previewMode) {
+                    mdPreview.innerHTML = parseMarkdown(noteBody.value);
+                    mdPreview.style.display = "block";
+                    noteBody.style.display = "none";
+                    previewBtn.classList.add("on");
+                } else {
+                    mdPreview.style.display = "none";
+                    noteBody.style.display = "block";
+                    previewBtn.classList.remove("on");
+                }
+                setPreviewIcon(previewMode);
+            });
+
+            /* ── Markdown parser ──────────────────────────────────────────── */
+            function applyInline(text) {
+                let s = escHtml(text);
+                // [[>>Folder]] → folder link chip  (>> is &gt;&gt; after escHtml)
+                s = s.replace(/\[\[&gt;&gt;([^\]]+)\]\]/g, (_, raw) => {
+                    const name = raw
+                        .replace(/&amp;/g, "&")
+                        .replace(/&lt;/g, "<")
+                        .replace(/&gt;/g, ">");
+                    const safe = name.replace(/'/g, "&#39;");
+                    return `<span class="md-folder-link" onclick="filterByFolder('${safe}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> ${escHtml(name)}</span>`;
+                });
+                // [[Note Title]] → note link chip
+                s = s.replace(/\[\[([^\]]+)\]\]/g, (_, raw) => {
+                    const title = raw
+                        .replace(/&amp;/g, "&")
+                        .replace(/&lt;/g, "<")
+                        .replace(/&gt;/g, ">");
+                    const note = Object.values(notes).find(
+                        (n) => n.title === title,
+                    );
+                    return note
+                        ? `<span class="md-note-link" onclick="openNoteById('${note.id}')">${escHtml(title)}</span>`
+                        : `<span class="md-note-link md-unresolved">${escHtml(title)}</span>`;
+                });
+                // Markdown links [text](url)
+                s = s.replace(
+                    /\[([^\]]+)\]\(([^)]+)\)/g,
+                    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+                );
+                // Inline code (protects content from further passes)
+                s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+                // Bold + italic combined
+                s = s.replace(
+                    /\*\*\*([^*]+)\*\*\*/g,
+                    "<strong><em>$1</em></strong>",
+                );
+                // Bold
+                s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+                // Italic
+                s = s.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, "<em>$1</em>");
+                // Strikethrough
+                s = s.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+                return s;
+            }
+
+            function parseMarkdown(raw) {
+                const lines = raw.split("\n");
+                let html = "";
+                let inList = false;
+
+                const closeList = () => {
+                    if (inList) {
+                        html += "</ul>";
+                        inList = false;
+                    }
+                };
+
+                for (const line of lines) {
+                    // Headings
+                    if (line.startsWith("### ")) {
+                        closeList();
+                        html += `<h3>${applyInline(line.slice(4))}</h3>`;
+                    } else if (line.startsWith("## ")) {
+                        closeList();
+                        html += `<h2>${applyInline(line.slice(3))}</h2>`;
+                    } else if (line.startsWith("# ")) {
+                        closeList();
+                        html += `<h1>${applyInline(line.slice(2))}</h1>`;
+                    }
+                    // Horizontal rule
+                    else if (/^-{3,}$/.test(line.trim())) {
+                        closeList();
+                        html += "<hr>";
+                    }
+                    // Checked checklist  - [x]
+                    else if (/^- \[x\] /i.test(line)) {
+                        if (!inList) {
+                            html += "<ul>";
+                            inList = true;
+                        }
+                        html +=
+                            `<li><div class="md-check">` +
+                            `<div class="md-box checked"></div>` +
+                            `<span class="md-lbl done">${applyInline(line.slice(6))}</span>` +
+                            `</div></li>`;
+                    }
+                    // Unchecked checklist  - [ ]
+                    else if (/^- \[ \] /.test(line)) {
+                        if (!inList) {
+                            html += "<ul>";
+                            inList = true;
+                        }
+                        html +=
+                            `<li><div class="md-check">` +
+                            `<div class="md-box"></div>` +
+                            `<span class="md-lbl">${applyInline(line.slice(6))}</span>` +
+                            `</div></li>`;
+                    }
+                    // List item  -
+                    else if (/^- /.test(line)) {
+                        if (!inList) {
+                            html += "<ul>";
+                            inList = true;
+                        }
+                        html += `<li>${applyInline(line.slice(2))}</li>`;
+                    }
+                    // Empty line → spacer
+                    else if (line.trim() === "") {
+                        closeList();
+                        html += "<br>";
+                    }
+                    // Paragraph
+                    else {
+                        closeList();
+                        html += `<p>${applyInline(line)}</p>`;
+                    }
+                }
+                closeList();
+                return html;
+            }
+
+            /* ── Context menus ────────────────────────────────────────────── */
+            function positionMenu(menuEl, clientX, clientY) {
+                // Place off-screen first to get computed size
+                menuEl.style.left = "-9999px";
+                menuEl.style.top = "-9999px";
+                menuEl.classList.add("visible");
+
+                const mw = menuEl.offsetWidth;
+                const mh = menuEl.offsetHeight;
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+
+                menuEl.style.left =
+                    Math.max(8, Math.min(clientX, vw - mw - 8)) + "px";
+                menuEl.style.top =
+                    Math.max(8, Math.min(clientY, vh - mh - 8)) + "px";
+            }
+
+            function showNoteMenu(e, id) {
+                hideAllMenus();
+                ctxNoteId = id;
+                positionMenu(
+                    ctxNoteEl,
+                    e.clientX ?? e.pageX ?? 0,
+                    e.clientY ?? e.pageY ?? 0,
+                );
+            }
+
+            function showFolderMenu(e, folder) {
+                hideAllMenus();
+                ctxFolderName = folder;
+                const isAll = folder === "Alle";
+                $("ctx-folder-sep").style.display = isAll ? "none" : "block";
+                $("ctx-folder-delete").style.display = isAll ? "none" : "flex";
+                positionMenu(
+                    ctxFolderEl,
+                    e.clientX ?? e.pageX ?? 0,
+                    e.clientY ?? e.pageY ?? 0,
+                );
+            }
+
+            function hideAllMenus() {
+                ctxNoteEl.classList.remove("visible");
+                ctxFolderEl.classList.remove("visible");
+            }
+
+            // Dismiss menus on outside click / Escape
+            document.addEventListener("click", (e) => {
+                if (!ctxNoteEl.contains(e.target))
+                    ctxNoteEl.classList.remove("visible");
+                if (!ctxFolderEl.contains(e.target))
+                    ctxFolderEl.classList.remove("visible");
+            });
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") hideAllMenus();
+            });
+
+            // Note menu actions
+            $("ctx-note-open").addEventListener("click", () => {
+                if (ctxNoteId) openNote(ctxNoteId);
+                hideAllMenus();
+            });
+            $("ctx-note-delete").addEventListener("click", () => {
+                if (ctxNoteId) deleteNote(ctxNoteId);
+                hideAllMenus();
+            });
+
+            // Folder menu actions
+            $("ctx-folder-select").addEventListener("click", () => {
+                if (ctxFolderName) {
+                    activeFolder = ctxFolderName;
+                    renderFolders();
+                    renderNotes();
+                }
+                hideAllMenus();
+            });
+            $("ctx-folder-delete").addEventListener("click", async () => {
+                if (!ctxFolderName || ctxFolderName === "Alle") {
+                    hideAllMenus();
+                    return;
+                }
+                const folderName = ctxFolderName;
+                hideAllMenus();
+                // Move notes from deleted folder to root ("Alle")
+                const affected = Object.values(notes).filter(
+                    (n) => (n.folder || "").trim() === folderName,
+                );
+                for (const n of affected) {
+                    await setDoc(
+                        doc(db, "notes", n.id),
+                        { folder: "" },
+                        { merge: true },
+                    );
+                }
+                if (activeFolder === folderName) activeFolder = "Alle";
+                showToast(`Ordner "${folderName}" gelöscht`);
+            });
+
+            /* ── Folder scroll arrows ─────────────────────────────────────── */
+            function updateFolderArrows() {
+                const sl = folderBar.scrollLeft;
+                const maxSl = folderBar.scrollWidth - folderBar.clientWidth;
+                fsLeft.classList.toggle("visible", sl > 2);
+                fsRight.classList.toggle("visible", maxSl - sl > 2);
+            }
+
+            folderBar.addEventListener("scroll", updateFolderArrows);
+            window.addEventListener("resize", updateFolderArrows);
+
+            fsLeft.addEventListener("click", () =>
+                folderBar.scrollBy({ left: -130, behavior: "smooth" }),
+            );
+            fsRight.addEventListener("click", () =>
+                folderBar.scrollBy({ left: 130, behavior: "smooth" }),
+            );
+
+            // Keyboard arrow navigation when folder bar is focused
+            folderBar.addEventListener("keydown", (e) => {
+                if (e.key === "ArrowRight") {
+                    e.preventDefault();
+                    folderBar.scrollBy({ left: 90, behavior: "smooth" });
+                }
+                if (e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    folderBar.scrollBy({ left: -90, behavior: "smooth" });
+                }
+            });
+
+            // Mouse-drag to scroll (desktop)
+            const dragState = {
+                active: false,
+                startX: 0,
+                scrollX: 0,
+                didDrag: false,
+            };
+
+            folderBar.addEventListener("mousedown", (e) => {
+                dragState.active = true;
+                dragState.startX = e.pageX;
+                dragState.scrollX = folderBar.scrollLeft;
+                dragState.didDrag = false;
+                folderBar.classList.add("is-dragging");
+            });
+            document.addEventListener("mousemove", (e) => {
+                if (!dragState.active) return;
+                const dx = e.pageX - dragState.startX;
+                if (Math.abs(dx) > 4) dragState.didDrag = true;
+                folderBar.scrollLeft = dragState.scrollX - dx;
+            });
+            document.addEventListener("mouseup", () => {
+                if (!dragState.active) return;
+                dragState.active = false;
+                folderBar.classList.remove("is-dragging");
+                // Reset didDrag after click event has fired
+                setTimeout(() => {
+                    dragState.didDrag = false;
+                }, 60);
+            });
+
+            /* ── Search ───────────────────────────────────────────────────── */
+            function updateSearchMeta() {
+                if (!searchQuery) {
+                    searchMeta.innerHTML = "";
+                    return;
+                }
+                const count = getFilteredNotes().length;
+                const folderHint =
+                    activeFolder !== "Alle" &&
+                    activeFolder !== SMART.HEUTE &&
+                    activeFolder !== SMART.ZULETZT
+                        ? ` <span class="search-meta-filter">in „${escHtml(activeFolder)}"</span>`
+                        : "";
+                searchMeta.innerHTML =
+                    `<span class="search-meta-count">${count}</span> ` +
+                    `${count === 1 ? "Ergebnis" : "Ergebnisse"}${folderHint}`;
+            }
+
+            let searchDebounce = null;
+            searchInput.addEventListener("input", (e) => {
+                searchQuery = e.target.value.trim();
+                const hasVal = searchQuery.length > 0;
+                searchClearBtn.classList.toggle("show", hasVal);
+                searchInput.classList.toggle("has-value", hasVal);
+                clearTimeout(searchDebounce);
+                searchDebounce = setTimeout(() => {
+                    renderNotes();
+                    updateSearchMeta();
+                }, 120);
+            });
+
+            searchClearBtn.addEventListener("click", () => {
+                searchInput.value = "";
+                searchQuery = "";
+                searchClearBtn.classList.remove("show");
+                searchInput.classList.remove("has-value");
+                searchMeta.innerHTML = "";
+                searchInput.focus();
+                renderNotes();
+            });
+
+            /* ── Export ───────────────────────────────────────────────────── */
+            $("export-btn").addEventListener("click", () => {
+                const json = JSON.stringify(Object.values(notes), null, 2);
+                const blob = new Blob([json], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `nexus-notes-${new Date().toISOString().slice(0, 10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast("Export abgeschlossen");
+            });
+
+            /* ── Import ───────────────────────────────────────────────────── */
+            $("import-btn").addEventListener("click", () =>
+                importInput.click(),
+            );
+
+            importInput.addEventListener("change", async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    if (!Array.isArray(data)) throw new Error("Kein Array");
+                    let count = 0;
+                    for (const n of data) {
+                        if (!n.id) n.id = uid();
+                        await setDoc(
+                            doc(db, "notes", String(n.id)),
+                            { ...n },
+                            { merge: true },
+                        );
+                        count++;
+                    }
+                    showToast(`Import: ${count} Notizen`);
+                } catch {
+                    showToast("Import fehlgeschlagen");
+                }
+                importInput.value = "";
+            });
+
+            /* ── Reset: clears ONLY local device data (Firebase stays intact) */
+            $("reset-btn").addEventListener("click", async () => {
+                resetClicks++;
+                clearTimeout(resetTimer);
+
+                if (resetClicks === 1) {
+                    showToast(
+                        "Nochmals klicken – löscht nur lokale Gerätedaten",
+                    );
+                    resetTimer = setTimeout(() => {
+                        resetClicks = 0;
+                    }, 3500);
+                } else if (resetClicks >= 2) {
+                    resetClicks = 0;
+                    // Clear localStorage (theme, prefs)
+                    localStorage.clear();
+                    // Clear all SW caches
+                    if ("caches" in window) {
+                        const keys = await caches.keys();
+                        await Promise.all(keys.map((k) => caches.delete(k)));
+                    }
+                    // Unregister service workers so they re-install fresh
+                    if ("serviceWorker" in navigator) {
+                        const regs =
+                            await navigator.serviceWorker.getRegistrations();
+                        await Promise.all(regs.map((r) => r.unregister()));
+                    }
+                    showToast(
+                        "Lokale Daten gelöscht — Firebase-Daten bleiben erhalten",
+                    );
+                    setTimeout(() => location.reload(), 1400);
+                }
+            });
+
+            /* ── Focus mode ───────────────────────────────────────────────── */
+            const focusBtn = $("focus-btn");
+            const focusExit = $("focus-exit");
+
+            focusBtn.addEventListener("click", () => {
+                document.body.classList.add("focus-mode");
+                noteBody.focus();
+            });
+            focusExit.addEventListener("click", () =>
+                document.body.classList.remove("focus-mode"),
+            );
+            document.addEventListener("keydown", (e) => {
+                if (
+                    e.key === "Escape" &&
+                    document.body.classList.contains("focus-mode")
+                ) {
+                    document.body.classList.remove("focus-mode");
+                }
+            });
+
+            /* ── Offline banner ────────────────────────────────────────────── */
+            const offlineBar = $("offline-bar");
+            window.addEventListener("offline", () =>
+                offlineBar.classList.add("show"),
+            );
+            window.addEventListener("online", () =>
+                offlineBar.classList.remove("show"),
+            );
+            if (!navigator.onLine) offlineBar.classList.add("show");
+
+            /* ── Bootstrap ────────────────────────────────────────────────── */
+            /* ── Window globals for md-preview onclick handlers ───────────── */
+            window.openNoteById = (id) => {
+                if (notes[id]) openNote(id);
+            };
+            window.filterByFolder = (name) => {
+                activeFolder = name;
+                renderFolders();
+                renderNotes();
+            };
+
+            // Give DOM a tick to render folder chips before checking arrow visibility
+            setTimeout(updateFolderArrows, 200);
+
+            /* ── Service Worker registration ──────────────────────────────── */
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                    navigator.serviceWorker.register("./sw.js").catch((err) => {
+                        console.warn("SW registration failed:", err);
+                    });
+                });
+            }
+        </script>
+    </body>
+</html>
